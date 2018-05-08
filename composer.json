@@ -22,9 +22,4 @@
 			"Fuel\\Core\\": "src/"
 		}
 	},
-	"extra": {
-		"branch-alias": {
-			"dev-master": "develop"
-		}
-	}
 }
