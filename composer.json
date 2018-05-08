@@ -1,0 +1,30 @@
+{
+	"name": "fuelphp/v1core",
+	"description": "Fuel PHP Framework - Version 1 PSR-4 Core Package",
+	"keywords": ["fuel", "fuelphp", "v1", "core"],
+	"homepage": "https://github.com/fuelphp/v1core",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Fuel PHP Framework Development Team",
+			"email": "team@fuelphp.com"
+		}
+	],
+	"require": {
+		"php": ">=5.4",
+		"ext-fileinfo": "*"
+	},
+	"require-dev": {
+		"codeception/codeception": "~2.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"Fuel\\Core\\": "src/"
+		}
+	},
+	"extra": {
+		"branch-alias": {
+			"dev-master": "develop"
+		}
+	}
+}
