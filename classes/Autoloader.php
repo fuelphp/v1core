@@ -155,10 +155,26 @@ class Autoloader
 	 *
 	 * @return	void
 	 */
-	public static function register()
+	public static function register($composer)
 	{
-		// define our v1 autoloader first
+		// store the composer instance
+		static::$composer = $composer;
+
+		// define the corepath
+		define('COREPATH', dirname(__DIR__));
+
+		// activate our v1 compatible autoloader
 		spl_autoload_register('Autoloader::load', true, true);
+	}
+
+	/**
+	 * Return the composer autoloader
+	 *
+	 * @return	ClassLoader
+	 */
+	public static function composer()
+	{
+		return static::$composer;
 	}
 
 	/**
