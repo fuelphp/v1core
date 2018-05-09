@@ -61,7 +61,25 @@ class Finder
 		if ( ! static::$instance)
 		{
 			static::initialize();
-			static::$instance = static::forge(array(APPPATH, COREPATH));
+
+			// default finder paths
+			$paths = array(
+				APPPATH,
+			);
+
+			// get the namespace paths from composer
+			$psr4paths = \Autoloader::composer()->getPrefixesPsr4();
+
+			// find the core path
+			if (array_key_exists("Fuel\\Core\\", $psr4paths))
+			{
+				foreach ($psr4paths["Fuel\\Core\\"] as $path)
+				{
+					$paths[] = realpath(dirname($path));
+				}
+			}
+			
+			static::$instance = static::forge($paths);
 		}
 
 		return static::$instance;

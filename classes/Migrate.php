@@ -103,7 +103,7 @@ class Migrate
 		// write the updated config
 		\Config::save(\Fuel::$env.DS.'migrations', 'migrations');
 
-		static::init = true;
+		static::$init = true;
 	}
 
 	/**
