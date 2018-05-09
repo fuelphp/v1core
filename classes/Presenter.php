@@ -17,13 +17,11 @@ namespace Fuel\Core;
  *
  * @package	    Fuel
  * @subpackage  Core
- * @category    Core * @author      Jelmer Schreuder
+ * @category    Core
+ * @author      Jelmer Schreuder
  */
 abstract class Presenter
 {
-	// namespace prefix
-	protected static $ns_prefix = 'Presenter_';
-
 	/**
 	 * Factory for fetching the Presenter
 	 *
@@ -35,30 +33,24 @@ abstract class Presenter
 	 */
 	public static function forge($presenter, $method = 'view', $auto_filter = null, $view = null)
 	{
-		// determine the presenter namespace from the current request context
-		$namespace = \Request::active() ? ucfirst(\Request::active()->module) : '';
-
 		// create the list of possible class prefixes
-		$prefixes = array(static::$ns_prefix, $namespace.'\\');
+		$prefixes = array('Presenter\\');
 
-		/**
-		 * Add non prefixed classnames to the list as well, for BC reasons
-		 *
-		 * @deprecated 1.6
-		 */
-		if ( ! empty($namespace))
+		// check if we have a namespace from the current request context
+		if ($namespace = \Request::active() ? ucfirst(\Request::active()->module) : '')
 		{
-			array_unshift($prefixes, $namespace.'\\'.static::$ns_prefix);
-			$prefixes[] = '';
+			// and if so, add it to the list
+			$prefixes[] = $namespace.'\\';
 		}
 
 		// loading from a specific namespace?
 		if (strpos($presenter, '::') !== false)
 		{
+			// we need to add it to the prefixes too
 			$split = explode('::', $presenter, 2);
 			if (isset($split[1]))
 			{
-				array_unshift($prefixes, ucfirst($split[0]).'\\'.static::$ns_prefix);
+				array_unshift($prefixes, ucfirst($split[0]).'\\Presenter\\');
 				$presenter = $split[1];
 			}
 		}
@@ -66,12 +58,12 @@ abstract class Presenter
 		// if no custom view is given, make it equal to the presenter name
 		is_null($view) and $view = $presenter;
 
-		// strip any extensions from the view name to determine the presenter to load
+		// strip any extensions from the view name and convert to a class name
 		$presenter = \Inflector::words_to_upper(str_replace(
 			array('/', DS),
-			'_',
+			'\\',
 			strpos($presenter, '.') === false ? $presenter : substr($presenter, 0, -strlen(strrchr($presenter, '.')))
-		));
+		), '\\');
 
 		// create the list of possible presenter classnames, start with the namespaced one
 		$classes = array();

@@ -22,7 +22,7 @@ class Router
 	/**
 	 * Defines the controller class prefix. This allows you to namespace controllers
 	 */
-	protected static $prefix = null;
+	protected static $prefix = '\\Controller\\';
 
 	/**
 	 * Add one or multiple routes
@@ -264,17 +264,13 @@ class Router
 	protected static function parse_segments($segments, $namespace = '', $module = false)
 	{
 		$temp_segments = $segments;
-		$prefix = static::get_prefix();
 
 		foreach (array_reverse($segments, true) as $key => $segment)
 		{
 			// determine which classes to check. First, all underscores, or all namespaced
 			$classes = array(
-				$namespace.$prefix.\Inflector::words_to_upper(implode(substr($prefix, -1, 1), $temp_segments), substr($prefix, -1, 1)),
+				$namespace.static::$prefix.\Inflector::words_to_upper(implode(substr(static::$prefix, -1, 1), $temp_segments), substr(static::$prefix, -1, 1)),
 			);
-
-			// if we're namespacing, check a hybrid version too
-			$classes[] = $namespace.$prefix.\Inflector::words_to_upper(implode('_', $temp_segments));
 
 			array_pop($temp_segments);
 
@@ -295,7 +291,7 @@ class Router
 		// Fall back for default module controllers
 		if ($module)
 		{
-			$class = $namespace.$prefix.ucfirst($module);
+			$class = $namespace.static::$prefix.ucfirst($module);
 			if (static::check_class($class))
 			{
 				return array(
@@ -332,20 +328,5 @@ class Router
 			}
 			throw $e;
 		}
-	}
-
-	/**
-	 * Get prefix.
-	 *
-	 * @return string Prefix as defined in config controller_prefix.
-	 */
-	protected static function get_prefix()
-	{
-		if (is_null(static::$prefix))
-		{
-			static::$prefix = ltrim(\Config::get('controller_prefix', 'Controller_'), '\\');
-		}
-		
-		return static::$prefix;
 	}
 }

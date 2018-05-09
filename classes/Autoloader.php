@@ -164,7 +164,7 @@ class Autoloader
 		define('COREPATH', dirname(__DIR__).DS);
 
 		// activate our v1 compatible autoloader
-		spl_autoload_register('Autoloader::load', true, true);
+		spl_autoload_register('Autoloader::load', true);
 	}
 
 	/**
@@ -228,6 +228,7 @@ class Autoloader
 			$file = str_replace('/', DS, static::$classes[$class]);
 			if (is_file($file))
 			{
+				logger(\Fuel::L_WARNING, "AUTOLOADER: File $file loaded via defined autoloader class!");
 				include $file;
 				static::init_class($class);
 				$loaded = true;
@@ -247,6 +248,7 @@ class Autoloader
 					);
 					if (is_file($path))
 					{
+						logger(\Fuel::L_WARNING, "AUTOLOADER: Namespaced file $path loaded via BC lookup!");
 						include $path;
 						static::init_class($class);
 						$loaded = true;
@@ -257,7 +259,7 @@ class Autoloader
 						include $path;
 						static::init_class($class);
 						$loaded = true;
-						logger(\Fuel::L_WARNING, "File $path does not conform to PSR-4 naming!");
+						logger(\Fuel::L_WARNING, "AUTOLOADER: Namespaced file $path loaded via BC lowercase lookup!");
 					}
 				}
 			}
@@ -271,16 +273,17 @@ class Autoloader
 			// fallback to lowercase files, for BC reasons
 			if (is_file($path))
 			{
+				logger(\Fuel::L_WARNING, "AUTOLOADER: APP class $path loaded via BC lookup!");
 				include $path;
 				static::init_class($class);
 				$loaded = true;
 			}
 			elseif (is_file($path = strtolower($path)))
 			{
+				logger(\Fuel::L_WARNING, "AUTOLOADER: APP class $path loaded via BC lowercase lookup!");
 				include $path;
 				static::init_class($class);
 				$loaded = true;
-				logger(\Fuel::L_WARNING, "File $path does not conform to PSR-4 naming!");
 			}
 		}
 
@@ -398,12 +401,6 @@ class Autoloader
 		elseif (function_exists('trait_exists') and trait_exists($class, false))
 		{
 			// nothing to do here
-		}
-
-		// else something went wrong somewhere, barf and exit now
-		else
-		{
-			throw new \FuelException('Class "'.$class.'" is not defined');
 		}
 	}
 }

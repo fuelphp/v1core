@@ -298,11 +298,6 @@ return array(
 	),
 
 	/**
-	 * Controller class prefix
-	 */
-	 'controller_prefix' => 'Controller_',
-
-	/**
 	 * Routing settings
 	 */
 	'routing' => array(
