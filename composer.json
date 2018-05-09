@@ -12,6 +12,10 @@
 	],
 	"require": {
 		"php": ">=5.4",
+		"phpseclib/phpseclib": "^2.0.0",
+		"paragonie/sodium_compat": "^1.6",
+		"monolog/monolog": "1.18.*",
+		"michelf/php-markdown": "1.7.0"
 		"ext-fileinfo": "*"
 	},
 	"require-dev": {
