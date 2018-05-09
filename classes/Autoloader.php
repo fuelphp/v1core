@@ -161,7 +161,7 @@ class Autoloader
 		static::$composer = $composer;
 
 		// define the corepath
-		define('COREPATH', dirname(__DIR__));
+		define('COREPATH', dirname(__DIR__).DS);
 
 		// activate our v1 compatible autoloader
 		spl_autoload_register('Autoloader::load', true, true);
