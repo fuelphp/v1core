@@ -20,6 +20,9 @@
 	"autoload": {
 		"psr-4": {
 			"Fuel\\Core\\": "classes/"
-		}
+		},
+		"files": [
+			"src/functions.php"
+		]
 	}
 }
