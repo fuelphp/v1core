@@ -3,7 +3,7 @@
  * Fuel is a fast, lightweight, community driven PHP 5.4+ framework.
  *
  * @package    Fuel
- * @version    1.9-dev
+ * @version    develop
  * @author     Fuel Development Team
  * @license    MIT License
  * @copyright  2010 - 2018 Fuel Development Team
@@ -23,7 +23,7 @@ class Fuel
 	/**
 	 * @var  string  The version of Fuel
 	 */
-	const VERSION = '1.9-dev';
+	const VERSION = 'develop';
 
 	/**
 	 * @var  string  constant used for when in testing mode
