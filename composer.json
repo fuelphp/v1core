@@ -22,7 +22,8 @@
 			"Fuel\\Core\\": "classes/"
 		},
 		"files": [
-			"src/functions.php"
+			"src/functions.php",
+			"src/handlers.php"
 		]
 	}
 }
