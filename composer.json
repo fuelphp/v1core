@@ -27,7 +27,7 @@
 		},
 		"files": [
 			"src/functions.php",
-			"src/handlers.php"
+			"src/bootstrap.php"
 		]
 	}
 }
