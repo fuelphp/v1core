@@ -298,7 +298,7 @@ class Autoloader
 					class_alias($full_class, $class);
 					static::init_class($class);
 					$loaded = true;
-					logger(\Fuel::L_WARNING, "AUTOLOADER: CORE class $path loaded via BC lookup!");
+					logger(\Fuel::L_INFO, "AUTOLOADER: CORE class $class aliased to $full_class");
 					break;
 				}
 				elseif (interface_exists($full_class) or trait_exists($full_class))
