@@ -228,10 +228,10 @@ class Autoloader
 			$file = str_replace('/', DS, static::$classes[$class]);
 			if (is_file($file))
 			{
-				logger(\Fuel::L_WARNING, "AUTOLOADER: File $file loaded via defined autoloader class!");
 				include $file;
 				static::init_class($class);
 				$loaded = true;
+				logger(\Fuel::L_WARNING, "AUTOLOADER: File $file loaded via defined autoloader class!");
 			}
 		}
 
@@ -248,10 +248,10 @@ class Autoloader
 					);
 					if (is_file($path))
 					{
-						logger(\Fuel::L_WARNING, "AUTOLOADER: Namespaced file $path loaded via BC lookup!");
 						include $path;
 						static::init_class($class);
 						$loaded = true;
+						logger(\Fuel::L_WARNING, "AUTOLOADER: Namespaced file $path loaded via BC lookup!");
 						break;
 					}
 					elseif (is_file($path = strtolower($path)))
@@ -273,17 +273,17 @@ class Autoloader
 			// fallback to lowercase files, for BC reasons
 			if (is_file($path))
 			{
-				logger(\Fuel::L_WARNING, "AUTOLOADER: APP class $path loaded via BC lookup!");
 				include $path;
 				static::init_class($class);
 				$loaded = true;
+				logger(\Fuel::L_WARNING, "AUTOLOADER: APP class $path loaded via BC lookup!");
 			}
 			elseif (is_file($path = strtolower($path)))
 			{
-				logger(\Fuel::L_WARNING, "AUTOLOADER: APP class $path loaded via BC lowercase lookup!");
 				include $path;
 				static::init_class($class);
 				$loaded = true;
+				logger(\Fuel::L_WARNING, "AUTOLOADER: APP class $path loaded via BC lowercase lookup!");
 			}
 		}
 
@@ -298,6 +298,7 @@ class Autoloader
 					class_alias($full_class, $class);
 					static::init_class($class);
 					$loaded = true;
+					logger(\Fuel::L_WARNING, "AUTOLOADER: CORE class $path loaded via BC lookup!");
 					break;
 				}
 				elseif (interface_exists($full_class) or trait_exists($full_class))
