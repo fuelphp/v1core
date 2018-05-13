@@ -57,6 +57,8 @@ if ( ! function_exists('import'))
 {
 	function import($path, $folder = 'classes')
 	{
+		$imported = false;
+
 		// unify the path
 		$path = str_replace('/', DIRECTORY_SEPARATOR, $path);
 
@@ -68,12 +70,17 @@ if ( ! function_exists('import'))
 				if (is_file($file = $loc.$folder.DIRECTORY_SEPARATOR.$path.$ext))
 				{
 					require_once $file;
-					return true;
+					$imported = true;
 				}
+			}
+
+			if ($imported)
+			{
+				return $imported;
 			}
 		}
 
-		return false;
+		return $imported;
 	}
 }
 
