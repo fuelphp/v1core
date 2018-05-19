@@ -291,9 +291,23 @@ class Autoloader
 			foreach (static::$core_namespaces as $ns)
 			{
 				$full_class = $ns.'\\'.$class;
-				if (class_exists($full_class) or interface_exists($full_class) or trait_exists($full_class))
+				if (class_exists($full_class) and ! class_exists($class))
 				{
 					class_alias($full_class, $class);
+					$loaded = true;
+				}
+				elseif (interface_exists($full_class) and ! interface_exists($class))
+				{
+					class_alias($full_class, $class);
+					$loaded = true;
+				}
+				elseif (trait_exists($full_class) and ! trait_exists($class))
+				{
+					class_alias($full_class, $class);
+					$loaded = true;
+				}
+				if ($loaded)
+				{
 					static::init_class($class);
 					logger(\Fuel::L_DEBUG, "AUTOLOADER: CORE class $class aliased to $full_class");
 				}
