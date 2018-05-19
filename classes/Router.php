@@ -22,7 +22,7 @@ class Router
 	/**
 	 * Defines the controller class prefix. This allows you to namespace controllers
 	 */
-	protected static $prefix = '\\Controller\\';
+	protected static $prefixes = array('\\Controller_', '\\Controller\\');
 
 	/**
 	 * Add one or multiple routes
@@ -268,9 +268,11 @@ class Router
 		foreach (array_reverse($segments, true) as $key => $segment)
 		{
 			// determine which classes to check. First, all underscores, or all namespaced
-			$classes = array(
-				$namespace.static::$prefix.\Inflector::words_to_upper(implode(substr(static::$prefix, -1, 1), $temp_segments), substr(static::$prefix, -1, 1)),
-			);
+			$classes = array();
+			foreach (static::$prefixes as $prefix)
+			{
+				$classes[]  = $namespace.$prefix.\Inflector::words_to_upper(implode(substr($prefix, -1, 1), $temp_segments), substr($prefix, -1, 1));
+			}
 
 			array_pop($temp_segments);
 
@@ -291,15 +293,18 @@ class Router
 		// Fall back for default module controllers
 		if ($module)
 		{
-			$class = $namespace.static::$prefix.ucfirst($module);
-			if (static::check_class($class))
+			foreach (static::$prefixes as $prefix)
 			{
-				return array(
-					'controller'       => $class,
-					'controller_path'  => isset($key) ? implode('/', array_slice($segments, 0, $key + 1)) : '',
-					'action'           => isset($segments[0]) ? $segments[0] : null,
-					'method_params'    => array_slice($segments, 1),
-				);
+				$class = $namespace.$prefix.ucfirst($module);
+				if (static::check_class($class))
+				{
+					return array(
+						'controller'       => $class,
+						'controller_path'  => isset($key) ? implode('/', array_slice($segments, 0, $key + 1)) : '',
+						'action'           => isset($segments[0]) ? $segments[0] : null,
+						'method_params'    => array_slice($segments, 1),
+					);
+				}
 			}
 		}
 

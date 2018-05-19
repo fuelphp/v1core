@@ -155,11 +155,8 @@ class Autoloader
 	 *
 	 * @return	void
 	 */
-	public static function register($composer)
+	public static function register()
 	{
-		// store the composer instance
-		static::$composer = $composer;
-
 		// define the corepath
 		define('COREPATH', dirname(__DIR__).DS);
 
@@ -172,8 +169,9 @@ class Autoloader
 	 *
 	 * @return	ClassLoader
 	 */
-	public static function composer()
+	public static function composer($composer = null)
 	{
+		is_object($composer) and static::$composer = $composer;
 		return static::$composer;
 	}
 
@@ -228,10 +226,10 @@ class Autoloader
 			$file = str_replace('/', DS, static::$classes[$class]);
 			if (is_file($file))
 			{
-				include $file;
-				static::init_class($class);
-				$loaded = true;
-				logger(\Fuel::L_WARNING, "AUTOLOADER: File $file loaded via defined autoloader class!");
+				if ($loaded = static::load_class($file, $class))
+				{
+					logger(\Fuel::L_DEBUG, "AUTOLOADER: Class $class in file $file found in add_class() list!");
+				}
 			}
 		}
 
@@ -248,18 +246,18 @@ class Autoloader
 					);
 					if (is_file($path))
 					{
-						include $path;
-						static::init_class($class);
-						$loaded = true;
-						logger(\Fuel::L_WARNING, "AUTOLOADER: Namespaced file $path loaded via BC lookup!");
-						break;
+						if ($loaded = static::load_class($path, $class))
+						{
+							logger(\Fuel::L_DEBUG, "AUTOLOADER: Class $class in namespaced file $path loaded via BC lookup!");
+							break;
+						}
 					}
 					elseif (is_file($path = strtolower($path)))
 					{
-						include $path;
-						static::init_class($class);
-						$loaded = true;
-						logger(\Fuel::L_WARNING, "AUTOLOADER: Namespaced file $path loaded via BC lowercase lookup!");
+						if ($loaded = static::load_class($path, $class))
+						{
+							logger(\Fuel::L_DEBUG, "AUTOLOADER: Class $class in namespaced file $path loaded via BC lowercase lookup!");
+						}
 					}
 				}
 			}
@@ -273,17 +271,17 @@ class Autoloader
 			// fallback to lowercase files, for BC reasons
 			if (is_file($path))
 			{
-				include $path;
-				static::init_class($class);
-				$loaded = true;
-				logger(\Fuel::L_WARNING, "AUTOLOADER: APP class $path loaded via BC lookup!");
+				if ($loaded = static::load_class($path, $class))
+				{
+					logger(\Fuel::L_DEBUG, "AUTOLOADER: APP class $class in $path loaded via BC lookup!");
+				}
 			}
 			elseif (is_file($path = strtolower($path)))
 			{
-				include $path;
-				static::init_class($class);
-				$loaded = true;
-				logger(\Fuel::L_WARNING, "AUTOLOADER: APP class $path loaded via BC lowercase lookup!");
+				if ($loaded = static::load_class($path, $class))
+				{
+					logger(\Fuel::L_DEBUG, "AUTOLOADER: APP class $class in $path loaded via BC lowercase lookup!");
+				}
 			}
 		}
 
@@ -293,19 +291,11 @@ class Autoloader
 			foreach (static::$core_namespaces as $ns)
 			{
 				$full_class = $ns.'\\'.$class;
-				if (class_exists($full_class))
+				if (class_exists($full_class) or interface_exists($full_class) or trait_exists($full_class))
 				{
 					class_alias($full_class, $class);
 					static::init_class($class);
-					$loaded = true;
-					logger(\Fuel::L_INFO, "AUTOLOADER: CORE class $class aliased to $full_class");
-					break;
-				}
-				elseif (interface_exists($full_class) or trait_exists($full_class))
-				{
-					class_alias($full_class, $class);
-					$loaded = true;
-					break;
+					logger(\Fuel::L_DEBUG, "AUTOLOADER: CORE class $class aliased to $full_class");
 				}
 			}
 		}
@@ -369,39 +359,58 @@ class Autoloader
 	}
 
 	/**
-	 * Checks to see if the given class has a static _init() method.  If so then
-	 * it calls it.
+	 * Loads a file, checks what classes it defined, and calls _init() on all of them
 	 *
-	 * @param string $class the class name
+	 * @param string $file   the file to load
+	 * @param string $toload the class to be loaded
+	 * @throws \Exception
+	 * @throws \FuelException
+	 */
+	protected static function load_class($file, $toload)
+	{
+		// result
+		$loaded = false;
+
+		// get the list of defined classes
+		$defined = get_declared_classes();
+
+		// load the file
+		include $file;
+
+		// get the list of new classes
+		$new = array_diff(get_declared_classes(), $defined);
+
+		// loop over the classes
+		foreach ($new as $class)
+		{
+			// update the result
+			$loaded = $loaded || ($class == $toload);
+
+			// call the classes static init if needed
+			static::init_class($class);
+		}
+
+		return $loaded;
+	}
+
+	/**
+	 * checks if the class has an _init(), and if so, calls it
+	 *
+	 * @param string $class   the class to initialize
+	 * @param string $toload the class to be loaded
 	 * @throws \Exception
 	 * @throws \FuelException
 	 */
 	protected static function init_class($class)
 	{
-		// if the loaded file contains a class...
-		if (class_exists($class, false))
+		if (static::$auto_initialize === $class)
 		{
-			// call the classes static init if needed
-			if (static::$auto_initialize === $class)
+			static::$auto_initialize = null;
+			if (method_exists($class, '_init') and is_callable($class.'::_init'))
 			{
-				static::$auto_initialize = null;
-				if (method_exists($class, '_init') and is_callable($class.'::_init'))
-				{
-					call_user_func($class.'::_init');
-				}
+				call_user_func($class.'::_init');
+				logger(\Fuel::L_DEBUG, "AUTOLOADER: Class $class has a static init() method, this is not PSR-4 compatible!");
 			}
-		}
-
-		// or an interface...
-		elseif (interface_exists($class, false))
-		{
-			// nothing to do here
-		}
-
-		// or a trait if you're not on 5.3 anymore...
-		elseif (function_exists('trait_exists') and trait_exists($class, false))
-		{
-			// nothing to do here
 		}
 	}
 }
